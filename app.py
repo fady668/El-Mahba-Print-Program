@@ -1352,7 +1352,7 @@ class Printer_APP(Tk):
         control_btns_frame.place(x=0, y=715+200, width=self.n_window_width, height=100)
         show_total_entry = Entry(control_btns_frame, textvariable=self.f_totalVar, state='readonly', bd=2, fg='black', justify='center',font=(self.Font_Family, 17, 'bold'))
         show_total_entry.place(x=self.n_window_width-150, y=10, width=100, height=40)
-        add_btn = CTkButton(control_btns_frame, text='حفظ الفاتورة', 
+        add_btn = CTkButton(self.n_window, text='حفظ الفاتورة', 
                             bg_color='white',
                             text_color='white', 
                             cursor='hand2',
@@ -1364,8 +1364,6 @@ class Printer_APP(Tk):
                             height=40,
                             command=self.new_fatora)
         add_btn.place(x=self.n_window_width-335, y=10)
-        # add_btn = CTkButton(self.n_window, text='حفظ الفاتورة', bg=self.btn_bg, fg='white', cursor='hand2', font=(self.Font_Family, 15), command=self.new_fatora)
-        # add_btn.place(x=self.n_window_width-335, y=10, width=110, height=40)
         f_reset_btn = CTkButton(control_btns_frame, text='إفراغ',
                                 text_color='white', 
                                 bg_color='white',
@@ -1742,17 +1740,17 @@ class Printer_APP(Tk):
 
         self.big_size_2()
 
-        self.s_window.protocol("WM_DELETE_WINDOW", self.destroy_func2)
+        # self.s_window.protocol("WM_DELETE_WINDOW", self.destroy_func2)
         
         if self.f_searchVar.get() not in Client_fatora_names:
             self.s_window.destroy()
             None
 
-        # ================================= CHECKBOXS =======================================
+    # ================================= CHECKBOXS =======================================
 
-        # make Salaries Dictionaries (Checkboxs)
-            # The Colors [ K, Y, M, C, zahabi, faddi, sapgha, warnish, kohley, spechial ]
-            # the taglid [ slofan, UV, spot, tawdib, taksir, dapoos, lask, taglid, forma, pasma 
+    # make Salaries Dictionaries (Checkboxs)
+        # The Colors [ K, Y, M, C, zahabi, faddi, sapgha, warnish, kohley, spechial ]
+        # the taglid [ slofan, UV, spot, tawdib, taksir, dapoos, lask, taglid, forma, pasma 
 
     def K(self):
         with open('Project_files/Salaries.json', 'r') as file:
@@ -2011,7 +2009,7 @@ class Printer_APP(Tk):
     def calculate_money(self):
         db = sqlite3.connect(f'Project_files/Clients Work/{self.searchVar.get()}/money_table.db')
         cr = db.cursor()
-            ########################################
+        
         cr.execute('CREATE TABLE IF NOT EXISTS money(pushWay text, date text, money intger)')
         db.commit()
         if self.enter_money.get():
@@ -2159,7 +2157,8 @@ class Printer_APP(Tk):
         # Add fatora to Fawatir database
         db = sqlite3.connect(f'Project_files/Clients Work/{self.searchVar.get()}/Fawatir.db')
         cr = db.cursor()
-
+        
+        # Fill The data Automatic if not exiests
         f_date = ''
 
         if self.e3_dateVar.get() and self.e2_dateVar.get() and self.e1_dateVar.get():
@@ -2180,8 +2179,10 @@ class Printer_APP(Tk):
             db.commit()
             self.Display_info_2()
 
-            if not os.path.exists(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}'):
-                os.makedirs(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}')
+            if os.path.exists(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}'):
+                shutil.rmtree(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}')
+                
+            os.makedirs(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}')
 
             info_dict = {
                 'اسم العملية':self.f_nameVar.get() ,'التاريخ':[self.e1_dateVar.get(), self.e2_dateVar.get(), self.e3_dateVar.get()], 
@@ -2202,8 +2203,10 @@ class Printer_APP(Tk):
                             [self.naklCkb_SAVEVar.get(), self.nakl_SAVEVar.get(), self.khadmatCkb_SAVEVar.get(), self.khadmat_SAVEVar.get(), self.kasCkb_SAVEVar.get(), self.kas_SAVEVar.get()]]
             }
 
-            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.name_of_work_entry.get()}/fatoraInformation.json', 'w') as file_1:
+            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/fatoraInformation.json', 'X') as file_1:
                 json.dump(info_dict, file_1)
+                
+            file_1.close()
 
             fatora_salaries = {
                 'K':self.K_var.get(),
@@ -2222,13 +2225,15 @@ class Printer_APP(Tk):
                 'film' : self.film_var.get()
             }
             
-            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.name_of_work_entry.get()}/fatoraSalaries.json', 'w') as sal_json_file:
+            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/fatoraSalaries.json', 'x') as sal_json_file:
                 json.dump(fatora_salaries, sal_json_file)
 
             sal_json_file.close()
 
             with open('Project_files/Salaries.json', 'r') as file_4:
                 salaries = json.load(file_4)
+                
+            file_4.close()
 
             fatora_Money = 0
 
@@ -2370,13 +2375,12 @@ class Printer_APP(Tk):
                 fatora_Money += float(self.nakl_SAVEVar.get())
 
 
-            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.name_of_work_entry.get()}/All Money.json', 'w') as file_2:
+            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/All Money.json', 'x') as file_2:
                 json.dump(fatora_Money, file_2)
                 
-            self.f_totalVar.set(fatora_Money)
-
             file_2.close()
-            file_1.close()
+                
+            self.f_totalVar.set(fatora_Money)
 
             self.display_money()
             self.fatora_reset()
@@ -2897,16 +2901,15 @@ class Printer_APP(Tk):
     # ===================================================================================
 
     def destroy_func2(self):
-        
-        self.fatora_reset_2()
         self.s_window.destroy()
-        self.Display_info_2()
         self.f_searchVar.set('')
+        self.fatora_reset_2()
+        self.Display_info_2()
 
     def work_window_distroy(self):
+        self.work_window.destroy()
         self.searchVar.set('')
         self.Display_info()
-        self.work_window.destroy()
 
     # ===================================================================================
     # Fatora Search Funcation
@@ -3255,8 +3258,8 @@ class Printer_APP(Tk):
             for m in am:
                 cam += m
         
-        fi_money = cam - fm
         if cam > 0:
+            fi_money = cam - fm
             Clients_cr.execute(f'update Clients set all_of_money = {fi_money} where name = "{self.searchVar.get()}"')
 
         # Fetch All Data from Database
@@ -3266,9 +3269,15 @@ class Printer_APP(Tk):
         # cr.execute(f'update All_fatora set f_money = "لاغي" where f_number = {self.delNumberVar.get()}')
 
         # Delete Fatora File
-        if self.f_searchVar.get():
-            if os.path.exists(f"Project_files/Clients Work/{self.searchVar.get()}/{self.f_searchVar.get()}"):
-                shutil.rmtree(f"Project_files/Clients Work/{self.searchVar.get()}/{self.f_searchVar.get()}")
+        try:
+            if self.f_searchVar.get():
+                if os.path.exists(f"Project_files/Clients Work/{self.searchVar.get()}/{self.f_searchVar.get()}"):
+                    shutil.rmtree(f"Project_files/Clients Work/{self.searchVar.get()}/{self.f_searchVar.get()}")
+                    
+        except Exception:
+            if self.f_searchVar.get():
+                if os.path.exists(f"Project_files/Clients Work/{self.searchVar.get()}/{self.f_searchVar.get()}"):
+                    os.rmdir(f"Project_files/Clients Work/{self.searchVar.get()}/{self.f_searchVar.get()}")
     
         db.commit() 
         db.close()
