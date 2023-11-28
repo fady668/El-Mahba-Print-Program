@@ -2011,7 +2011,7 @@ class Printer_APP(Tk):
     def calculate_money(self):
         db = sqlite3.connect(f'Project_files/Clients Work/{self.searchVar.get()}/money_table.db')
         cr = db.cursor()
-
+            ########################################
         cr.execute('CREATE TABLE IF NOT EXISTS money(pushWay text, date text, money intger)')
         db.commit()
         if self.enter_money.get():
