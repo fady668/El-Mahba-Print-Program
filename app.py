@@ -802,8 +802,8 @@ class Printer_APP(Tk):
         try:
             shutil.rmtree(f'Project_files/Clients Work/{self.searchVar.get()}')
         except PermissionError as e:
-            time.sleep(2)  # Adjust the duration based on your needs
-            shutil.rmtree(f'Project_files/Clients Work/{self.searchVar.get()}')
+            time.sleep(1)  # Adjust the duration based on your needs
+            os.rmdir(f'Project_files/Clients Work/{self.searchVar.get()}')
             
         cr.execute(f'delete FROM Clients where name="{self.searchVar.get()}"')
 
@@ -844,7 +844,7 @@ class Printer_APP(Tk):
         
         name_frame = Frame(self.work_window, bg=self.lbl_bg)
         name_frame.place(x=(self.work_window_width-238)+6, y=2, width=230, height=71)
-        name_lbl = Label(name_frame, text=f'أسم العميل\n({self.searchVar.get()})', bg=self.lbl_bg, fg='white', font=(self.Font_Family, 18, 'bold'))
+        name_lbl = Label(name_frame, text=f'أسم العميل\n( {self.searchVar.get()} )', bg=self.lbl_bg, fg='white', font=(self.Font_Family, 18, 'bold'))
         name_lbl.pack(pady=(2, 0))
 
         Search_frame = Frame(self.work_window, bg='white')
@@ -942,7 +942,7 @@ class Printer_APP(Tk):
                                     height=50,
                                     command=self.take_money)
         estlam_btn.place(x=23, y=230)
-        kashfHesab_btn = CTkButton(btn_frame, text='كشف حساب',
+        kashfHesab_btn = CTkButton(btn_frame, text='أضافات خارجية',
                                     text_color='white', 
                                     cursor='hand2',
                                     font=(self.Font_Family, 22),
@@ -952,9 +952,19 @@ class Printer_APP(Tk):
                                     width=190,
                                     height=50)
         kashfHesab_btn.place(x=23, y=290)
+        kashfHesab_btn = CTkButton(btn_frame, text='كشف حساب',
+                                    text_color='white', 
+                                    cursor='hand2',
+                                    font=(self.Font_Family, 22),
+                                    border_width=2,
+                                    border_color='silver',
+                                    corner_radius=10,
+                                    width=190,
+                                    height=50)
+        kashfHesab_btn.place(x=23, y=350)
         
         pakyElhesap_frame = CTkFrame(btn_frame, fg_color='white', corner_radius=20, border_width=3, border_color='black', width=220)
-        pakyElhesap_frame.pack(pady=(350, 0))
+        pakyElhesap_frame.pack(pady=(420, 0))
         pakyElhesap_lbl = Label(pakyElhesap_frame, text=f'اجــــــمــــــالــــــي الــــــحـــــــســــــاب', bg='white', fg='red', font=(self.Font_Family, 18, 'bold'), width=14)
         pakyElhesap_lbl.pack()
         self.pakyElhesap_lbl_2 = Label(pakyElhesap_frame, text=f'', bg='white', fg='black', font=(self.Font_Family, 18, 'bold'))
@@ -1352,7 +1362,8 @@ class Printer_APP(Tk):
         control_btns_frame.place(x=0, y=715+200, width=self.n_window_width, height=100)
         show_total_entry = Entry(control_btns_frame, textvariable=self.f_totalVar, state='readonly', bd=2, fg='black', justify='center',font=(self.Font_Family, 17, 'bold'))
         show_total_entry.place(x=self.n_window_width-150, y=10, width=100, height=40)
-        add_btn = CTkButton(self.n_window, text='حفظ الفاتورة', 
+        add_btn = CTkButton(control_btns_frame,
+                            text='حفظ الفاتورة',
                             bg_color='white',
                             text_color='white', 
                             cursor='hand2',
@@ -1699,7 +1710,7 @@ class Printer_APP(Tk):
         takeMoney_btn.place(x=self.s_window_width-90, y=10)
         show_total_entry = Entry(control_btns_frame, textvariable=self.f_totalSHOWVar, state='readonly', bd=2, fg='black', justify='center',font=(self.Font_Family, 17, 'bold'))
         show_total_entry.place(x=self.s_window_width-200, y=10, width=100, height=40)
-        add_btn = CTkButton(control_btns_frame, text='تعديل الفاتوره', 
+        add_btn = CTkButton(self.s_window, text='تعديل الفاتوره', 
                             text_color='white', 
                                 bg_color='white',
                                 cursor='hand2',
@@ -2001,9 +2012,56 @@ class Printer_APP(Tk):
         self.money_table.column('date', minwidth=378//3, width=378//3, stretch=NO, anchor=CENTER)
         self.money_table.heading('money', text='المبلغ', anchor=CENTER)
         self.money_table.column('money', minwidth=378//3, width=(378//3)-3, stretch=NO, anchor=CENTER)
+        self.money_table.bind('<Double-1>', self.on_double_Click)
 
         self.display_take_money_table()
         
+    def on_double_Click(self, event):
+        self.deletePushMess()
+        
+    # ===================================================================================
+    
+    def deletePushMess(self):
+        self.dpm = Toplevel()
+        self.dpm.title('رسالة حذف الدفعة')
+        self.dpm_width = 350
+        self.dpm_height = 120
+        self.dpm.config(background='white')
+        self.dpm.geometry(f'{self.dpm_width}x{self.dpm_height}+{(self.winfo_screenwidth() - self.dpm_width)//2}+{(self.winfo_screenheight() - self.dpm_height)//2}')
+
+        self.dpm_lbl = Label(self.dpm, text='هل تريد حذف هذا الدفعة ؟', bg='white', fg='black', font=(self.Font_Family, 18, 'bold')).pack(pady=(10,0))
+
+        yes_btn = CTkButton(self.dpm, text='نعم',
+                            fg_color='red',
+                            hover_color='#E30004',
+                            text_color='white', 
+                            cursor='hand2',
+                            font=(self.Font_Family, 22),
+                            border_width=2,
+                            border_color='grey',
+                            corner_radius=10,
+                            width=60,
+                            height=40,
+                            command=self.del_push)
+        yes_btn.place(x=185, y=60)
+
+        no_btn = CTkButton(self.dpm, text='لا',
+                        text_color='white', 
+                        cursor='hand2',
+                        font=(self.Font_Family, 22),
+                        border_width=2,
+                        border_color='silver',
+                        corner_radius=10,
+                        width=60,
+                        height=40,
+                            command=self.dpm.destroy)
+        no_btn.place(x=105, y=60)
+    
+    # ===================================================================================
+    
+    def del_push(self):
+        pass
+    
     # ===================================================================================
     
     def calculate_money(self):
@@ -2203,7 +2261,7 @@ class Printer_APP(Tk):
                             [self.naklCkb_SAVEVar.get(), self.nakl_SAVEVar.get(), self.khadmatCkb_SAVEVar.get(), self.khadmat_SAVEVar.get(), self.kasCkb_SAVEVar.get(), self.kas_SAVEVar.get()]]
             }
 
-            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/fatoraInformation.json', 'X') as file_1:
+            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/fatoraInformation.json', 'w') as file_1:
                 json.dump(info_dict, file_1)
                 
             file_1.close()
@@ -2225,7 +2283,7 @@ class Printer_APP(Tk):
                 'film' : self.film_var.get()
             }
             
-            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/fatoraSalaries.json', 'x') as sal_json_file:
+            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/fatoraSalaries.json', 'w') as sal_json_file:
                 json.dump(fatora_salaries, sal_json_file)
 
             sal_json_file.close()
@@ -2375,7 +2433,7 @@ class Printer_APP(Tk):
                 fatora_Money += float(self.nakl_SAVEVar.get())
 
 
-            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/All Money.json', 'x') as file_2:
+            with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.f_nameVar.get()}/All Money.json', 'w') as file_2:
                 json.dump(fatora_Money, file_2)
                 
             file_2.close()
@@ -2646,10 +2704,8 @@ class Printer_APP(Tk):
         f_date = f'{self.e3_dateSHOWVar.get()} / {self.e2_dateSHOWVar.get()} / {(self.e1_dateSHOWVar.get()).zfill(2)}'
 
         cr.execute(f'update All_fatora set f_date = "{f_date}", f_name = "{new_name}" where f_number = {self.delNumberVar.get()}')
-        if new_name:
+        if new_name != old_name:
             os.rename(f'Project_files/Clients Work/{self.searchVar.get()}/{old_name}', f'Project_files/Clients Work/{self.searchVar.get()}/{new_name}')
-        else:
-            os.makedirs(f'Project_files/Clients Work/{self.searchVar.get()}/{self.name_of_work_entry.get()}')
         
         info_dict = {
             'اسم العملية': self.f_nameSHOWVar.get(), 'التاريخ':[self.e1_dateSHOWVar.get(), self.e2_dateSHOWVar.get(), self.e3_dateSHOWVar.get()], 
@@ -2672,6 +2728,8 @@ class Printer_APP(Tk):
 
         with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.name_of_work_entry.get()}/fatoraInformation.json', 'w') as file:
             json.dump(info_dict, file)
+            
+        file.close()
 
         fatora_salaries = {
             'K':self.K_SHOWvar.get(),
@@ -2690,13 +2748,15 @@ class Printer_APP(Tk):
             'film' : self.film_SHOWvar.get()
             }
 
-        with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.name_of_work_entry.get()}/fatoraSalaries.json', 'w') as sal_json_file:
+        with open(f'Project_files/Clients Work/{self.searchVar.get()}/{new_name}/fatoraSalaries.json', 'w') as sal_json_file:
             json.dump(fatora_salaries, sal_json_file)
 
         sal_json_file.close()
             
-        with open(f'Project_files/Clients Work/{self.searchVar.get()}/{self.name_of_work_entry.get()}/fatoraSalaries.json', 'r') as file_4:
+        with open(f'Project_files/Clients Work/{self.searchVar.get()}/{new_name}/fatoraSalaries.json', 'r') as file_4:
             fatora_salaries = json.load(file_4)
+            
+        file_4.close()
 
         fatora_Money_SHOW = 0
 
@@ -2839,11 +2899,11 @@ class Printer_APP(Tk):
         with open(f'Project_files/Clients Work/{self.searchVar.get()}/{new_name}/All Money.json', 'w') as file_2:
             json.dump(fatora_Money_SHOW, file_2)
             
+        file_2.close()
+            
         self.f_totalSHOWVar.set(fatora_Money_SHOW)
 
         db.commit()
-        file_2.close()
-        file.close()
         self.fatoraDateSort()
         self.fatoraNumberSort()
         self.display_money()
